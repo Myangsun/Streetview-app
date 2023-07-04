@@ -1,56 +1,108 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Map, Geolocation, Marker } from "@uiw/react-amap";
-import { initializeApp } from "firebase/app";
-import { getStorage, ref, uploadString } from "firebase/storage";
-
-// Initialize Firebase. Replace these values with your actual Firebase config.
-const firebaseConfig = {
-  apiKey: "AIzaSyB3p-yiWJEFyxN_qJeDHOw3FKy3KtrgpQA",
-  authDomain: "streetview-app-5cc5a.firebaseapp.com",
-  projectId: "streetview-app-5cc5a",
-  storageBucket: "streetview-app-5cc5a.appspot.com",
-  messagingSenderId: "820610466111",
-  appId: "1:820610466111:web:3f7dd70579f8a75a5d938a",
-  measurementId: "G-8EMLDPGBSM",
-};
-
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
+import AMapLoader from "@amap/amap-jsapi-loader";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../firebase";
+import Submit from "./Submit";
 
 const MapComponent = () => {
-  const mapRef = useRef();
   const [userId, setUserId] = useState("");
   const [address, setAddress] = useState("");
   const [markerPosition, setMarkerPosition] = useState({
     longitude: 0,
     latitude: 0,
   });
+  window._AMapSecurityConfig = {
+    securityJsCode: "5e0c8daa97f90c952d78ffd79f5a65a9",
+  };
+  const geocoder = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current) {
-      return;
-    }
+    AMapLoader.load({
+      key: "5006aba1c28995bc84672dca708fc2d8",
+      version: "2.0",
+      plugins: ["AMap.Geocoder", "AMap.Geolocation"],
+    })
+      .then((AMap) => {
+        const map = new AMap.Map("container", {
+          zoom: 13,
+          resizeEnable: true,
+        });
 
-    const AMap = window.AMap;
-    const map = mapRef.current.getAMapInstance();
-    const geocoder = new AMap.Geocoder({});
+        const marker = new AMap.Marker({
+          map: map,
+        });
 
-    AMap.event.addListener(map, "moveend", () => {
-      const center = map.getCenter();
-      setMarkerPosition({ longitude: center.lng, latitude: center.lat });
+        geocoder.current = new AMap.Geocoder({});
 
-      geocoder.getAddress(center, function (status, result) {
+        const geolocation = new AMap.Geolocation({
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+          convert: true,
+          showButton: true,
+          buttonPosition: "RB",
+          buttonOffset: new AMap.Pixel(10, 20),
+          showMarker: false,
+          showCircle: true,
+          panToLocation: true,
+          zoomToAccuracy: true,
+        });
+
+        map.addControl(geolocation);
+
+        geolocation.getCurrentPosition((status, result) => {
+          if (status === "complete") {
+            marker.setPosition(result.position);
+            setMarkerPosition({
+              longitude: result.position.lng,
+              latitude: result.position.lat,
+            });
+          } else {
+            console.log("Geolocation failed: " + result.message);
+          }
+        });
+
+        map.on("moveend", function () {
+          const center = map.getCenter();
+          marker.setPosition(center);
+          setMarkerPosition({ longitude: center.lng, latitude: center.lat });
+        });
+      })
+      .catch((e) => console.error(e));
+  }, []);
+
+  const getAddress = (longitude, latitude) => {
+    return new Promise((resolve, reject) => {
+      geocoder.current.getAddress([longitude, latitude], (status, result) => {
+        console.log("Geocoding status: ", status);
+        console.log("Geocoding result: ", result);
         if (status === "complete" && result.info === "OK") {
-          setAddress(result.regeocode.formattedAddress);
+          resolve(result.regeocode.formattedAddress);
+        } else {
+          reject("Failed to get address");
         }
       });
     });
-  }, []);
+  };
 
   const handleSubmit = async () => {
     try {
-      const storageRef = ref(storage, `locations/${userId}`);
-      await uploadString(storageRef, address);
+      if (userId.trim() === "") {
+        alert("User ID cannot be empty");
+        return;
+      }
+      const currentAddress = await getAddress(
+        markerPosition.longitude,
+        markerPosition.latitude
+      );
+      const docRef = doc(db, "locations", userId);
+      await setDoc(docRef, {
+        username: userId,
+        address: currentAddress,
+        position: [markerPosition.longitude, markerPosition.latitude],
+        timestamp: serverTimestamp(),
+      });
+      setAddress(currentAddress);
       alert("Data submitted successfully");
     } catch (error) {
       console.error("Error uploading data:", error);
@@ -58,24 +110,30 @@ const MapComponent = () => {
   };
 
   return (
-    <div>
-      <input
-        value={userId}
-        onChange={(e) => setUserId(e.target.value)}
-        placeholder="Enter User ID"
-      />
-      <Map
-        ref={mapRef}
-        center={markerPosition}
-        zoom={13}
-        amapkey="5006aba1c28995bc84672dca708fc2d8"
-        version="2.0"
-      >
-        <Geolocation />
-        <Marker position={markerPosition} />
-      </Map>
-      <button onClick={handleSubmit}>Submit</button>
-      <div>Address: {address}</div>
+    <div className="h-screen bg-gray-100 overflow-hidden mx-auto">
+      <div className="fixed w-full top-20 z-50 text-center">
+        <input
+          className=" w-[60%] text-lg rounded-lg px-3"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          placeholder="Enter User ID"
+        />{" "}
+        <div className="w-[60%] top-28 text-md rounded-lg font-light px-3">
+          Address: {address}
+        </div>
+      </div>
+      <div id="container" className="h-full"></div>
+
+      <div className="w-full fixed bottom-12 items-center flex">
+        <button
+          onClick={handleSubmit}
+          className="bg-gray-500 hover:bg-gray-700 text-white text-md font-bold py-1 px-3 rounded ml-auto mr-6"
+        >
+          Submit
+        </button>
+        {/* Click to send location information/ request url */}
+        <Submit />
+      </div>
     </div>
   );
 };

@@ -3,9 +3,9 @@ import logo from "../logo192.png";
 
 function Header() {
   return (
-    <div className="fixed w-full top-0 z-50 bg-white flex items-center p-2 lg:px-5 shadow-md">
+    <div className="fixed w-full top-0 z-50 bg-white flex justify-center items-center p-2 lg:px-5 shadow-md">
       {/* left */}
-      <div className="flex items-center">
+      <div className="flex items-center ">
         <img src={logo} width={40} height={40} />
         <div className="flex ml-2 items-center rounded-full p-2">
           <h1 className="font-bold text-xl"> Streetview</h1>

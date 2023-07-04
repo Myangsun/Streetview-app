@@ -1,6 +1,6 @@
 import React from "react";
 // import MapComponent from "./components/MapContainer";
-import MapContent from "./components/MapContent";
+// import MapContent from "./components/MapContent";
 import MapComponent from "./components/Maptest";
 import Header from "./components/Header";
 
