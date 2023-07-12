@@ -14,7 +14,7 @@ function Submit() {
   return (
     <div>
       <ArrowRightCircleIcon
-        className="h-16 w-16 text-blue-500 mr-12 bottom-12 z-50"
+        className="h-16 w-16 text-blue-500 mr-2 bottom-14 z-50"
         onClick={routeChange}
       />
     </div>

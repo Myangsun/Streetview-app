@@ -8,7 +8,7 @@ function Header() {
       <div className="flex items-center ">
         {/* <img src={logo} width={60} height={60} /> */}
         <div className="flex ml-1 items-center rounded-full p-2">
-          <h1 className="font-bold text-xl">ReCityGen 无障城市再生</h1>
+          <h1 className="font-bold text-xl">ReCityGen</h1>
         </div>
       </div>
 

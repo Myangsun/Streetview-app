@@ -96,15 +96,16 @@ const MapComponent = () => {
         markerPosition.latitude
       );
       const params = {
-        TableName: "locations",
+        TableName: "location",
         Item: {
+          id: Date.now().toString(),
           username: userId,
           address: currentAddress,
           position: {
             longitude: markerPosition.longitude,
             latitude: markerPosition.latitude,
           },
-          timestamp: Date.now(),
+          timestamp: new Date().toISOString(),
         },
       };
       await dynamoDB.put(params).promise();
@@ -119,7 +120,7 @@ const MapComponent = () => {
     <div className="h-screen bg-gray-100 overflow-hidden mx-auto">
       <div className="fixed w-full top-20 z-50 text-center">
         <input
-          className=" w-[60%] text-lg rounded-lg px-3 pt-2 pb-2"
+          className=" w-[80%] text-lg rounded-lg px-3 pt-2 pb-2"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
           placeholder="输入用户名"
@@ -130,10 +131,10 @@ const MapComponent = () => {
       </div>
       <div id="container" className="h-full"></div>
 
-      <div className="w-full fixed bottom-12 items-center flex">
+      <div className="w-full fixed bottom-14 items-center flex">
         <button
           onClick={handleSubmit}
-          className="bg-gray-500 hover:bg-gray-700 text-white text-md font-bold py-2 px-4 rounded ml-auto mr-6"
+          className="bg-gray-500 hover:bg-gray-700 text-white text-md font-bold py-2 px-4 rounded ml-auto mr-3"
         >
           提交
         </button>
