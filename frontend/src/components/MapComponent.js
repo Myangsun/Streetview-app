@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import AMapLoader from "@amap/amap-jsapi-loader";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../firebase";
 import Submit from "./Submit";
+import dynamoDB from "../config";
+import amapConfig from "../amapConfig";
 
 const MapComponent = () => {
   const [userId, setUserId] = useState("");
@@ -12,13 +12,13 @@ const MapComponent = () => {
     latitude: 0,
   });
   window._AMapSecurityConfig = {
-    securityJsCode: "5e0c8daa97f90c952d78ffd79f5a65a9",
+    securityJsCode: amapConfig.securityJsCode,
   };
   const geocoder = useRef(null);
 
   useEffect(() => {
     AMapLoader.load({
-      key: "5006aba1c28995bc84672dca708fc2d8",
+      key: amapConfig.key,
       version: "2.0",
       plugins: ["AMap.Geocoder", "AMap.Geolocation"],
     })
@@ -95,15 +95,21 @@ const MapComponent = () => {
         markerPosition.longitude,
         markerPosition.latitude
       );
-      const docRef = doc(db, "locations", userId);
-      await setDoc(docRef, {
-        username: userId,
-        address: currentAddress,
-        position: [markerPosition.longitude, markerPosition.latitude],
-        timestamp: serverTimestamp(),
-      });
+      const params = {
+        TableName: "locations",
+        Item: {
+          username: userId,
+          address: currentAddress,
+          position: {
+            longitude: markerPosition.longitude,
+            latitude: markerPosition.latitude,
+          },
+          timestamp: Date.now(),
+        },
+      };
+      await dynamoDB.put(params).promise();
       setAddress(currentAddress);
-      alert("Data submitted successfully");
+      alert("Data submitted successfully 成功提交");
     } catch (error) {
       console.error("Error uploading data:", error);
     }
@@ -113,23 +119,23 @@ const MapComponent = () => {
     <div className="h-screen bg-gray-100 overflow-hidden mx-auto">
       <div className="fixed w-full top-20 z-50 text-center">
         <input
-          className=" w-[60%] text-lg rounded-lg px-3"
+          className=" w-[60%] text-lg rounded-lg px-3 pt-2 pb-2"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          placeholder="Enter User ID"
+          placeholder="输入用户名"
         />{" "}
-        <div className="w-[60%] top-28 text-md rounded-lg font-light px-3">
-          Address: {address}
-        </div>
+        {/* <div className="w-[60%] top-28 text-md rounded-lg font-light px-3"> */}
+        {/* Address: {address} */}
+        {/* </div> */}
       </div>
       <div id="container" className="h-full"></div>
 
       <div className="w-full fixed bottom-12 items-center flex">
         <button
           onClick={handleSubmit}
-          className="bg-gray-500 hover:bg-gray-700 text-white text-md font-bold py-1 px-3 rounded ml-auto mr-6"
+          className="bg-gray-500 hover:bg-gray-700 text-white text-md font-bold py-2 px-4 rounded ml-auto mr-6"
         >
-          Submit
+          提交
         </button>
         {/* Click to send location information/ request url */}
         <Submit />

@@ -5,8 +5,6 @@ import { useNavigate } from "react-router-dom";
 function Submit() {
   let navigate = useNavigate();
   const routeChange = (e) => {
-    //后端 location + timestamp
-    // key usesession:user id "str"
     let path = `/gradioapp`;
 
     navigate(path);

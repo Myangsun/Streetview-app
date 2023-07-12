@@ -5,7 +5,8 @@
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@uiw/react-amap": "^5.0.4",
-    "firebase": "^9.23.0",
+    "aws-sdk": "^2.1412.0",
+    "fs": "^0.0.1-security",
     "react": "^18.2.0",
     "react-amap": "^1.2.8",
     "react-dom": "^18.2.0",
