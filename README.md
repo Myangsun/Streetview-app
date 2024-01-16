@@ -1,2 +1,2 @@
-cd backend
-python main.py
+RECITYGEN
+Interactive and Generative Participatory Urban Design Tool with Latent Diffusion and Segment Anything
