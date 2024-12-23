@@ -26,4 +26,11 @@ config
 amapConfig
 config.js
 /src/config.js
+<<<<<<< HEAD
 /src/amapConfig.js
+=======
+/src/amapConfig.js
+
+/streetview.pem
+/backend/sam_vit_h_4b8939.pth
+>>>>>>> 12f2e1b6 (deploy)

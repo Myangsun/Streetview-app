@@ -14,7 +14,11 @@ import json
 sam_checkpoint = "sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
+<<<<<<< HEAD
 device = "cuda"
+=======
+device = "cuda" if torch.cuda.is_available() else "cpu"
+>>>>>>> 12f2e1b6 (deploy)
 
 sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 sam.to(device)
@@ -22,21 +26,42 @@ sam.to(device)
 predictor = SamPredictor(sam)
 
 pipe = StableDiffusionInpaintPipeline.from_pretrained(
+<<<<<<< HEAD
     "models--stabilityai--stable-diffusion-2-inpainting/snapshots/6ba40839c3c171123b2b863d16caf023e297abb9", torch_dtype=torch.float16,)
 pipe = pipe.to(device)
 
+=======
+    "stabilityai/stable-diffusion-2-inpainting", torch_dtype=torch.float16)
+# pipe = StableDiffusionInpaintPipeline.from_pretrained(
+#     "models--stabilityai--stable-diffusion-2-inpainting/snapshots/6ba40839c3c171123b2b863d16caf023e297abb9", torch_dtype=torch.float16,)
+pipe = pipe.to(device)
+
+
+>>>>>>> 12f2e1b6 (deploy)
 def plot_points(coords, labels, ax, marker_size=375):
     print(f'coords shape: {coords.shape}')
     print(f'labels shape: {labels.shape}')
 
     pos_points = coords[labels == 1]
     neg_points = coords[labels == 0]
+<<<<<<< HEAD
     
     print(f'pos_points shape: {pos_points.shape}')
     print(f'neg_points shape: {neg_points.shape}')
     
     ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='.', s=marker_size, edgecolor='white', linewidth=1.25)
     ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='.', s=marker_size, edgecolor='white', linewidth=1.25)
+=======
+
+    print(f'pos_points shape: {pos_points.shape}')
+    print(f'neg_points shape: {neg_points.shape}')
+
+    ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green',
+               marker='.', s=marker_size, edgecolor='white', linewidth=1.25)
+    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red',
+               marker='.', s=marker_size, edgecolor='white', linewidth=1.25)
+
+>>>>>>> 12f2e1b6 (deploy)
 
 selected_pixels = []
 selected_labels = []
@@ -74,7 +99,11 @@ with gr.Blocks() as demo:
     with gr.Row():
         survey = gr.Textbox(
             label="Survey", placeholder="Survey link: https://www.google.com", disabled=True)
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 12f2e1b6 (deploy)
     def on_upload_button_clicked(image):
         # Convert np.array image to PIL Image
         image = Image.fromarray(image)
@@ -84,6 +113,7 @@ with gr.Blocks() as demo:
         top = (height - min_dim)/2
         right = (width + min_dim)/2
         bottom = (height + min_dim)/2
+<<<<<<< HEAD
         
         image = image.crop((left, top, right, bottom))
         
@@ -102,6 +132,25 @@ with gr.Blocks() as demo:
         current_label = 0
         #print(current_label)
 
+=======
+
+        image = image.crop((left, top, right, bottom))
+
+        image_resized = image.resize((512, 512), Image.ANTIALIAS)
+        return image_resized
+
+    def on_add_button_clicked():
+        # print('Add Button Clicked!')
+        global current_label
+        current_label = 1
+        # print(current_label)
+
+    def on_remove_button_clicked():
+        # print('Remove Button Clicked!')
+        global current_label
+        current_label = 0
+        # print(current_label)
+>>>>>>> 12f2e1b6 (deploy)
 
     def reset_mask(mask_img, output_img):
         global selected_pixels, selected_labels
@@ -110,10 +159,16 @@ with gr.Blocks() as demo:
         mask_img = None
         output_img = None
         return mask_img, output_img
+<<<<<<< HEAD
         
 
     def generate_mask(image, evt: gr.SelectData):
         #print(evt.index)
+=======
+
+    def generate_mask(image, evt: gr.SelectData):
+        # print(evt.index)
+>>>>>>> 12f2e1b6 (deploy)
         selected_pixels.append(evt.index)
         selected_labels.append(current_label)
 
@@ -146,7 +201,11 @@ with gr.Blocks() as demo:
         # print(img.shape)
 
         # Set Canvas Size equal to UI Component boundary
+<<<<<<< HEAD
         fig = plt.figure(figsize=(5,5))
+=======
+        fig = plt.figure(figsize=(5, 5))
+>>>>>>> 12f2e1b6 (deploy)
 
         plt.imshow(img)
 
@@ -157,7 +216,10 @@ with gr.Blocks() as demo:
 
         return fig
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 12f2e1b6 (deploy)
     def inpaint(image, mask, prompt):
         # print(image)
         image = Image.fromarray(image)
@@ -205,7 +267,11 @@ with gr.Blocks() as demo:
             'timestamp': timestamp,
             'prompt': prompt
         }
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 12f2e1b6 (deploy)
         json_filename = f'../../output/user_data.json'
         data = []
 
@@ -224,6 +290,7 @@ with gr.Blocks() as demo:
     upload_button.click(on_upload_button_clicked, [input_img_o], [input_img])
     add_button.click(on_add_button_clicked, [], [])
     remove_button.click(on_remove_button_clicked, [], [])
+<<<<<<< HEAD
     reset_button.click(reset_mask, [mask_img, output_img], [mask_img, output_img])
     input_img.select(generate_mask,inputs=[input_img],outputs=[mask_img])
     input_img.select(show_points, inputs=[input_img],outputs=[mask_img_with_label])
@@ -234,4 +301,19 @@ with gr.Blocks() as demo:
                  )
     sumbit.click(saveFile,
                  inputs=[user_name, input_img, mask_img, output_img, prompt_text],outputs=[]
+=======
+    reset_button.click(reset_mask, [mask_img, output_img], [
+                       mask_img, output_img])
+    input_img.select(generate_mask, inputs=[input_img], outputs=[mask_img])
+    input_img.select(show_points, inputs=[
+                     input_img], outputs=[mask_img_with_label])
+
+    generateBtn.click(inpaint,
+                      inputs=[input_img, mask_img, prompt_text],
+                      outputs=[output_img],
+                      )
+    sumbit.click(saveFile,
+                 inputs=[user_name, input_img, mask_img,
+                         output_img, prompt_text], outputs=[]
+>>>>>>> 12f2e1b6 (deploy)
                  )
